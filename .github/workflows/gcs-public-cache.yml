@@ -1,7 +1,7 @@
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 0 * * 1'
+    - cron: '0 0 1 * *'
 
 jobs:
   set-gcs-cache-control:
@@ -16,7 +16,7 @@ jobs:
       - name: Set up Cloud SDK
         uses: google-github-actions/setup-gcloud@v0
 
-      - name: Echo values from ENV
+      - name: Batch setup Cache-Control per object
         run: |
           IFS="," read -a gcs_domains <<< "${{ secrets.GCS_PUBLIC_DOMAINS }}"
           for gcs_domain in "${gcs_domains[@]}"; do
