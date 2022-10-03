@@ -1,3 +1,5 @@
+name: GCS Cache-Control Batch
+
 on:
   workflow_dispatch:
   schedule:
