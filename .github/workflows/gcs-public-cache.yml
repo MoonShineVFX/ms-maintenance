@@ -18,7 +18,7 @@ jobs:
 
       - name: Echo values from ENV
         run: |
-          IFS="," read -a gcs_domains <<< ${{ env.GCS_PUBLIC_DOMAINS }}
+          IFS="," read -a gcs_domains <<< "${{ env.GCS_PUBLIC_DOMAINS }}"
           for gcs_domain in "${gcs_domains[@]}"; do
             gsutil -m setmeta -r -h "Cache-control:public, max-age=604800" gs://${gcs_domain}
           done
