@@ -1,0 +1,24 @@
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * 1'
+
+jobs:
+  set-gcs-cache-control:
+    name: Set GCS Cache-Control
+    runs-on: ubuntu-latest
+    steps:
+      - id: auth
+        uses: google-github-actions/auth@v0
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v0
+
+      - name: Echo values from ENV
+        run: |
+          IFS="," read -a gcs_domains <<< ${{ env.GCS_PUBLIC_DOMAINS }}
+          for gcs_domain in "${gcs_domains[@]}"; do
+            gsutil -m setmeta -r -h "Cache-control:public, max-age=604800" gs://${gcs_domain}
+          done
