@@ -4,9 +4,24 @@ on:
     - cron: '0 0 * * 1'
 
 jobs:
+  setup:
+    name: Create matrix
+    runs-on: ubuntu-latest
+    steps:
+      - id: matrix
+        run: |
+          gcs_domains="${{ env.GCS_PUBLIC_DOMAINS }}"
+          echo "::set-output name=matrix-gcs-domains::[\"${gcs_domains//', '/\",\"}\"]"
+    outputs:
+      matrix-gcs-domains: ${{ steps.matrix.outputs.matrix-gcs-domains }}
+
   set-gcs-cache-control:
+    needs: [setup]
     name: Set GCS Cache-Control
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        value: ${{fromJson(needs.setup.outputs.matrix-gcs-domains)}}
     steps:
       - id: auth
         uses: google-github-actions/auth@v0
@@ -18,7 +33,4 @@ jobs:
 
       - name: Echo values from ENV
         run: |
-          IFS="," read -a gcs_domains <<< "${{ env.GCS_PUBLIC_DOMAINS }}"
-          for gcs_domain in "${gcs_domains[@]}"; do
-            gsutil -m setmeta -r -h "Cache-control:public, max-age=604800" gs://${gcs_domain}
-          done
+          gsutil -m setmeta -r -h "Cache-control:public, max-age=15778463" gs://${{ matrix.value }}
